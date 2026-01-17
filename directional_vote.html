@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Squid Game Directional Voting</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        h1 {
+            letter-spacing: 5px;
+            text-shadow: 0 0 10px #ff0055;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .cross-container {
+            display: grid;
+            grid-template-areas: 
+                ".      up      ."
+                "left   center  right"
+                ".      down    .";
+            grid-template-columns: 140px 140px 140px;
+            grid-template-rows: 140px 140px 140px;
+            gap: 20px;
+            align-items: center;
+            justify-items: center;
+        }
+
+        .vote-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .item-up    { grid-area: up; }
+        .item-left  { grid-area: left; }
+        .item-right { grid-area: right; }
+        .item-down  { grid-area: down; }
+        
+        .item-center { 
+            grid-area: center; 
+            border: 2px solid #222;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            color: #444;
+            letter-spacing: 2px;
+        }
+
+        .vote-button {
+            background: none;
+            border: 4px solid transparent;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            padding: 5px;
+            border-radius: 15px;
+            outline: none;
+        }
+
+        .vote-button img {
+            width: 110px;
+            height: 110px;
+            display: block;
+        }
+
+        .vote-button.yellow.active, .vote-button.yellow:hover { border-color: #ffff00; transform: scale(1.1); box-shadow: 0 0 20px #ffff00; }
+        .vote-button.red.active,    .vote-button.red:hover    { border-color: #ff0000; transform: scale(1.1); box-shadow: 0 0 20px #ff0000; }
+        .vote-button.green.active,  .vote-button.green:hover  { border-color: #008000; transform: scale(1.1); box-shadow: 0 0 20px #008000; }
+        .vote-button.blue.active,   .vote-button.blue:hover   { border-color: #0000ff; transform: scale(1.1); box-shadow: 0 0 20px #0000ff; }
+
+        .tally {
+            font-size: 1.4rem;
+            margin: 5px 0;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255,255,255,0.5);
+        }
+
+        #total-container {
+            margin-top: 30px;
+            font-size: 1.2rem;
+            color: #aaa;
+            letter-spacing: 2px;
+        }
+
+        #total-votes {
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 0 0 8px #fff;
+        }
+
+        .reset-btn {
+            margin-top: 25px;
+            background: transparent;
+            color: #ff0055;
+            border: 1px solid #ff0055;
+            padding: 10px 25px;
+            cursor: pointer;
+            font-family: inherit;
+            letter-spacing: 2px;
+            transition: 0.3s;
+        }
+
+        .reset-btn:hover {
+            background: #ff0055;
+            color: #000;
+            box-shadow: 0 0 15px #ff0055;
+        }
+
+        #status-msg {
+            margin-top: 15px;
+            height: 24px;
+            color: #ff0055;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>DIRECTIONAL BALLOT</h1>
+
+    <div class="cross-container">
+        <div class="vote-item item-up">
+            <div class="tally" id="tally-yellow">0</div>
+            <button id="btn-yellow" class="vote-button yellow" onclick="castVote('yellow')">
+                <img src="Ball2.png" alt="Yellow Up">
+            </button>
+        </div>
+
+        <div class="vote-item item-left">
+            <button id="btn-red" class="vote-button red" onclick="castVote('red')">
+                <img src="Ball3.png" alt="Red Left">
+            </button>
+            <div class="tally" id="tally-red">0</div>
+        </div>
+
+        <div class="item-center">VOTE</div>
+
+        <div class="vote-item item-right">
+            <button id="btn-green" class="vote-button green" onclick="castVote('green')">
+                <img src="Ball4.png" alt="Green Right">
+            </button>
+            <div class="tally" id="tally-green">0</div>
+        </div>
+
+        <div class="vote-item item-down">
+            <button id="btn-blue" class="vote-button blue" onclick="castVote('blue')">
+                <img src="Ball1.png" alt="Blue Down">
+            </button>
+            <div class="tally" id="tally-blue">0</div>
+        </div>
+    </div>
+
+    <div id="total-container">
+        TOTAL BALLOTS CAST: <span id="total-votes">0</span>
+    </div>
+
+    <div id="status-msg">READY TO VOTE</div>
+
+    <button class="reset-btn" onclick="resetVotes()">RESET SYSTEM</button>
+
+    <audio id="sound-blue" src="vote_blue.ogg"></audio>
+    <audio id="sound-yellow" src="vote_yellow.ogg"></audio>
+    <audio id="sound-red" src="vote_red.ogg"></audio>
+    <audio id="sound-green" src="vote_green.ogg"></audio>
+
+    <script>
+        let votes = { blue: 0, yellow: 0, red: 0, green: 0 };
+        let total = 0;
+
+        function castVote(color) {
+            votes[color]++;
+            total++;
+            
+            document.getElementById(`tally-${color}`).innerText = votes[color];
+            document.getElementById('total-votes').innerText = total;
+
+            const sound = document.getElementById(`sound-${color}`);
+            sound.currentTime = 0; 
+            sound.play();
+
+            const msg = document.getElementById('status-msg');
+            msg.innerText = `${color.toUpperCase()} VOTE REGISTERED`;
+            
+            const btn = document.getElementById(`btn-${color}`);
+            btn.classList.add('active');
+            setTimeout(() => btn.classList.remove('active'), 150);
+        }
+
+        function resetVotes() {
+            votes = { blue: 0, yellow: 0, red: 0, green: 0 };
+            total = 0;
+            
+            // Update UI
+            document.getElementById('tally-blue').innerText = "0";
+            document.getElementById('tally-yellow').innerText = "0";
+            document.getElementById('tally-red').innerText = "0";
+            document.getElementById('tally-green').innerText = "0";
+            document.getElementById('total-votes').innerText = "0";
+            
+            const msg = document.getElementById('status-msg');
+            msg.innerText = "SYSTEM RESET COMPLETE";
+            setTimeout(() => msg.innerText = "READY TO VOTE", 2000);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case "ArrowUp":    castVote('yellow'); break;
+                case "ArrowDown":  castVote('blue');   break;
+                case "ArrowLeft":  castVote('red');    break;
+                case "ArrowRight": castVote('green');  break;
+                case "r":
+                case "R":          resetVotes();       break;
+            }
+        });
+    </script>
+</body>
+</html>
