@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>8-Way Squid Ballot</title>
+    <title>8-Way Squid Ballot - Numpad Ready</title>
     <style>
         :root {
             --teal: #009999; --purple: #990099; --pink: #ff00ff; --lime: #00ff00;
@@ -80,8 +80,8 @@
         /* Glow Colors */
         .ul.active, .ul:hover { border-color: var(--teal); box-shadow: 0 0 20px var(--teal); }
         .ur.active, .ur:hover { border-color: var(--purple); box-shadow: 0 0 20px var(--purple); }
-        .dl.active, .dl:hover { border-color: var(--pink); box-shadow: 0 0 20px var(--pink); }
-        .dr.active, .dr:hover { border-color: var(--lime); box-shadow: 0 0 20px var(--lime); }
+        .dl.active, .dl:hover { border-color: var(--pink); box-shadow: 0 0 20px var(--pink); } /* Pink DL */
+        .dr.active, .dr:hover { border-color: var(--lime); box-shadow: 0 0 20px var(--lime); } /* Lime DR */
         .yellow.active, .yellow:hover { border-color: var(--yellow); box-shadow: 0 0 20px var(--yellow); }
         .blue.active, .blue:hover { border-color: var(--blue); box-shadow: 0 0 20px var(--blue); }
         .red.active, .red:hover { border-color: var(--red); box-shadow: 0 0 20px var(--red); }
@@ -94,33 +94,19 @@
             color: var(--squid-pink); 
             font-size: 1.4rem; 
             letter-spacing: 3px;
-            text-shadow: 0 0 5px var(--squid-pink);
-        }
-
-        .reset-section {
-            margin-top: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
         }
 
         .reset-btn {
+            margin-top: 30px;
             background: transparent;
             color: #333;
             border: 1px solid #222;
             padding: 8px 20px;
             cursor: pointer;
             font-family: inherit;
-            letter-spacing: 1px;
-            transition: 0.3s;
         }
 
-        .reset-btn:hover {
-            color: var(--squid-pink);
-            border-color: var(--squid-pink);
-            box-shadow: 0 0 10px var(--squid-pink);
-        }
+        .reset-btn:hover { color: var(--squid-pink); border-color: var(--squid-pink); }
     </style>
 </head>
 <body>
@@ -147,9 +133,7 @@
 
     <div id="total-display">TOTAL BALLOTS: <span id="grand-total">0</span></div>
 
-    <div class="reset-section">
-        <button class="reset-btn" onclick="resetSystem()">RESET SYSTEM (R)</button>
-    </div>
+    <button class="reset-btn" onclick="resetSystem()">RESET SYSTEM (R)</button>
 
     <audio id="s-u" src="vote_yellow.ogg"></audio><audio id="s-d" src="vote_blue.ogg"></audio>
     <audio id="s-l" src="vote_red.ogg"></audio><audio id="s-r" src="vote_green.ogg"></audio>
@@ -201,13 +185,24 @@
             }
         }
 
+        // Expanded Keyboard Mappings
         window.addEventListener('keydown', (e) => {
-            const k = e.key.toLowerCase();
-            if (k === 'arrowup') vote('u'); if (k === 'arrowdown') vote('d');
-            if (k === 'arrowleft') vote('l'); if (k === 'arrowright') vote('r');
-            if (k === 'q') vote('ul'); if (k === 'e') vote('ur');
-            if (k === 'z') vote('dl'); if (k === 'c') vote('dr');
-            if (k === 'r') resetSystem();
+            const k = e.key;
+            
+            // Standard Keys
+            if (k === 'ArrowUp' || k === '8')    vote('u');
+            if (k === 'ArrowDown' || k === '2')  vote('d');
+            if (k === 'ArrowLeft' || k === '4')  vote('l');
+            if (k === 'ArrowRight' || k === '6') vote('r');
+            
+            // Diagonals (Q/E/Z/C + Numpad)
+            if (k.toLowerCase() === 'q' || k === '7') vote('ul');
+            if (k.toLowerCase() === 'e' || k === '9') vote('ur');
+            if (k.toLowerCase() === 'z' || k === '1') vote('dl');
+            if (k.toLowerCase() === 'c' || k === '3') vote('dr');
+            
+            // System
+            if (k.toLowerCase() === 'r') resetSystem();
         });
 
         updateMode('4way');
